@@ -18,7 +18,7 @@ def get_file_content(working_directory, file_path):
 
         # Check containment
         if not abs_file_path.startswith(abs_working_directory):
-            f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
+            return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
 
         # Read file content
         MAX_CHARS = 10000
