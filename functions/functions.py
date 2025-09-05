@@ -1,7 +1,12 @@
 from google.genai import types
 
+get_file_content_name = "get_file_content"
+get_files_info_name = "get_files_info"
+run_python_file_name = "run_python_file"
+write_file_name = "write_file_content"
+
 schema_get_file_content = types.FunctionDeclaration(
-    name="get_file_content",
+    name=get_file_content_name,
     description="Retrieves the content of a specified file, constrained to the working directory.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
@@ -16,7 +21,7 @@ schema_get_file_content = types.FunctionDeclaration(
 )
 
 schema_get_files_info = types.FunctionDeclaration(
-    name="get_files_info",
+    name=get_files_info_name,
     description="Lists files in the specified directory along with their sizes, constrained to the working directory.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
@@ -30,7 +35,7 @@ schema_get_files_info = types.FunctionDeclaration(
 )
 
 schema_run_python_file = types.FunctionDeclaration(
-    name="run_python_file",
+    name=run_python_file_name,
     description="Executes a specified Python file with optional arguments and returns its output, constrained to the working directory.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
@@ -51,7 +56,7 @@ schema_run_python_file = types.FunctionDeclaration(
 )
 
 schema_write_file = types.FunctionDeclaration(
-    name="write_file",
+    name=write_file_name,
     description="Writes content to a specified file, constrained to the working directory.",
     parameters=types.Schema(
         type=types.Type.OBJECT,
