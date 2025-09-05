@@ -33,31 +33,43 @@ def main():
         types.Content(role="user", parts=[types.Part(text=user_prompt)]),
     ]
 
-    response = client.models.generate_content(
-        model='gemini-2.0-flash-001',
-        contents=messages,
-        config=types.GenerateContentConfig(
-            tools=[available_functions],
-            system_instruction=system_prompt
-        ),
-    )
+    try:
+        for iteration in range(20): # Limit to 20 iterations to avoid infinite loops
+            response = client.models.generate_content(
+                model='gemini-2.0-flash-001',
+                contents=messages,
+                config=types.GenerateContentConfig(
+                    tools=[available_functions],
+                    system_instruction=system_prompt,
+                ),
+            )
 
-    if isVerbose:
-        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+            if response.text:
+                print("Response:")
+                print(response.text)
+                if not response.function_calls:
+                    break
 
+            if response.candidates:
+                for candidate in response.candidates:
+                    messages.append(candidate.content)
 
-    if response.function_calls:
-        for function_call_part in response.function_calls:
-            function_call_result = call_function(function_call_part, verbose=isVerbose)
-            if function_call_result.parts[0].function_response.response:
-                if isVerbose:
-                    print(f"-> {function_call_result.parts[0].function_response.response}")
-            else:
-                raise Exception("response not in expected format")
-    else:
-        print("Response:")
-        print(response.text)
+            if isVerbose:
+                print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+                print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+
+            if response.function_calls:
+                for function_call_part in response.function_calls:
+                    function_call_result = call_function(function_call_part, verbose=isVerbose)
+                    if function_call_result.parts:
+                        if isVerbose:
+                            print(f"-> {function_call_result.parts[0].function_response.response}")
+                        messages.append(types.Content(role="user", parts=function_call_result.parts))
+                    else:
+                        raise Exception("response not in expected format")
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
