@@ -44,29 +44,30 @@ def main():
                 ),
             )
 
-            if response.text:
-                print("Response:")
-                print(response.text)
-                if not response.function_calls:
-                    break
+            if isVerbose:
+                print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+                print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
             if response.candidates:
                 for candidate in response.candidates:
                     messages.append(candidate.content)
 
-            if isVerbose:
-                print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-                print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+            if not response.function_calls:
+                print("Response:")
+                print(response.text)
+                break
 
-            if response.function_calls:
-                for function_call_part in response.function_calls:
-                    function_call_result = call_function(function_call_part, verbose=isVerbose)
-                    if function_call_result.parts:
-                        if isVerbose:
-                            print(f"-> {function_call_result.parts[0].function_response.response}")
-                        messages.append(types.Content(role="user", parts=function_call_result.parts))
-                    else:
-                        raise Exception("response not in expected format")
+            for function_call_part in response.function_calls:
+                function_call_result = call_function(function_call_part, verbose=isVerbose)
+                if not function_call_result.parts:
+                    raise Exception("empty function call result")
+                
+                if isVerbose:
+                    print(f"-> {function_call_result.parts[0].function_response.response}")
+                
+                function_call_result.role = "user"
+                messages.append(function_call_result)
+
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
